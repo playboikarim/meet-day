@@ -44,3 +44,12 @@ npm start
 ## 검증
 
 타입 검사 및 프로덕션 빌드 통과. 로컬 API에서 방 생성, 두 명 참여, 날짜 저장, 공통 날짜 계산, 잘못된 참여 토큰의 수정 거절을 확인했습니다.
+
+## GitHub Pages
+
+주소: https://playboikarim.github.io/meet-day/
+
+화면은 GitHub Pages의 docs 폴더에서 제공하고 API와 D1 데이터는 기존 Cloudflare 서버를 사용합니다. 방 링크는 각 호스트의 현재 경로를 유지합니다. 브라우저별 참여 정보는 도메인마다 별도로 저장됩니다.
+
+Pages 화면 갱신: node node_modules/vite/bin/vite.js build --config vite.pages.config.ts 실행 후 docs/.nojekyll 파일을 유지하고 main에 push합니다.
+

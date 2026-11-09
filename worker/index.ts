@@ -3,7 +3,11 @@ import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
-  fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+  async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+    const origin = request.headers.get('Origin');
+    const isPages = origin === 'https://playboikarim.github.io' && new URL(request.url).pathname === '/api/rooms';
+    const cors = {'Access-Control-Allow-Origin':'https://playboikarim.github.io','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type','Vary':'Origin'};
+    if(isPages && request.method === 'OPTIONS') return new Response(null,{status:204,headers:cors});
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.
@@ -23,8 +27,13 @@ const worker = {
         },
       };
     }
-    return runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    const response = await runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    if(!isPages) return response;
+    const result = new Response(response.body,response);
+    for(const [key,value] of Object.entries(cors)) result.headers.set(key,value);
+    return result;
   },
 };
 
 export default worker;
+
